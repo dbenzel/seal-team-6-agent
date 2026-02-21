@@ -6,9 +6,19 @@ Think of it as a **package manager for agentic context** — replicate successfu
 
 ## Quick Start
 
+**macOS / Linux:**
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1 | iex
+```
+
+> **Windows note:** If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first.
 
 This installs into your current project directory:
 - `docs/seal-team-6/` — Full best practices documentation (canonical source)
@@ -21,6 +31,12 @@ This installs into your current project directory:
 curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh -s -- --lang=typescript,python
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1))) -Lang typescript,python
+```
+
 Available languages: `typescript`, `python`, `go`, `rust`, `java`, `csharp`
 
 ### Additional Options
@@ -31,6 +47,16 @@ curl -fsSL .../install.sh | sh -s -- --version=v1.0.0
 
 # Generate Cursor/Windsurf integration files
 curl -fsSL .../install.sh | sh -s -- --cursor --windsurf
+```
+
+**Windows (PowerShell):**
+
+```powershell
+# Pin to a specific version
+& ([scriptblock]::Create((irm .../install.ps1))) -Version v1.0.0
+
+# Generate Cursor/Windsurf integration files
+& ([scriptblock]::Create((irm .../install.ps1))) -Cursor -Windsurf
 ```
 
 ## What's Inside
@@ -92,6 +118,11 @@ Copy the override template and edit:
 cp .seal-team-6-overrides.example.md .seal-team-6-overrides.md
 ```
 
+```powershell
+# Windows
+Copy-Item .seal-team-6-overrides.example.md .seal-team-6-overrides.md
+```
+
 Override any section — unaddressed topics fall through to defaults. See the template for examples.
 
 ## Updating
@@ -102,13 +133,19 @@ Re-run the install command. It's idempotent — the seal-team-6 reference block 
 curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1 | iex
+```
+
 ## Supported AI Tools
 
 | Tool | Integration |
 |---|---|
 | **Claude Code** | Reads `CLAUDE.md` → `agents.md` automatically |
-| **Cursor** | Run with `--cursor` flag, or point `.cursorrules` at `agents.md` manually |
-| **Windsurf** | Run with `--windsurf` flag, or point `.windsurfrules` at `agents.md` manually |
+| **Cursor** | Run with `--cursor` / `-Cursor` flag, or point `.cursorrules` at `agents.md` manually |
+| **Windsurf** | Run with `--windsurf` / `-Windsurf` flag, or point `.windsurfrules` at `agents.md` manually |
 | **Other** | Reference `agents.md` in your tool's context configuration |
 
 ## Contributing
