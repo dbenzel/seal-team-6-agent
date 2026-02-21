@@ -23,6 +23,16 @@ curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/inst
 
 Available languages: `typescript`, `python`, `go`, `rust`, `java`, `csharp`
 
+### Additional Options
+
+```bash
+# Pin to a specific version
+curl -fsSL .../install.sh | sh -s -- --version=v1.0.0
+
+# Generate Cursor/Windsurf integration files
+curl -fsSL .../install.sh | sh -s -- --cursor --windsurf
+```
+
 ## What's Inside
 
 ### Three-Layer Architecture
@@ -31,11 +41,13 @@ Available languages: `typescript`, `python`, `go`, `rust`, `java`, `csharp`
 agents.md (root)
 │
 ├── Layer 1: Agentic Guidance
-│   ├── guardrails.md          — Safety, blast radius, destructive action prevention
-│   ├── task-decomposition.md  — Breaking work into subtasks, planning
-│   ├── tool-usage.md          — Right tool for the job, parallelization
-│   ├── context-management.md  — Keeping context clean and relevant
-│   └── verification.md        — Testing, validation, checking your work
+│   ├── guardrails.md            — Safety, blast radius, destructive action prevention
+│   ├── task-decomposition.md    — Breaking work into subtasks, planning
+│   ├── tool-usage.md            — Right tool for the job, parallelization
+│   ├── context-management.md    — Keeping context clean and relevant
+│   ├── verification.md          — Testing, validation, checking your work
+│   ├── orchestration.md         — Reference trees, sub-agent delegation, context budgeting
+│   └── continuous-improvement.md — Boy scout rule, opportunistic cleanup
 │
 ├── Layer 2: Engineering Principles (language-agnostic)
 │   ├── code-quality.md        — Naming, simplicity, readability
@@ -59,14 +71,14 @@ agents.md (root)
 
 1. The installer **injects a reference block** at the top of your existing `agents.md` and `CLAUDE.md` (or creates them if they don't exist). Existing project-specific guidance is preserved below.
 2. The canonical `docs/seal-team-6/agents.md` instructs the agent to **detect your stack** (package.json → TypeScript, go.mod → Go, etc.)
-3. Seal-team-6 principles take precedence — they guide the codebase toward alignment with these standards
-4. Existing project guidance is still respected for anything seal-team-6 doesn't address
+3. Seal-team-6 principles guide new code toward alignment with these standards; existing project patterns are respected for established code (see Conflict Resolution in `agents.md`)
+4. Existing project guidance is still respected — seal-team-6 only overrides when there's a security issue or actively harmful pattern
 5. If `.seal-team-6-overrides.md` exists, those directives override specific seal-team-6 defaults
 6. Re-running the installer updates the seal-team-6 block (between `<!-- BEGIN/END seal-team-6 -->` markers) without touching your content
 
 ### Key Opinions
 
-- **TDD is the default workflow.** Write a failing test. See red. Implement. See green. Refactor. No exceptions.
+- **TDD is the default workflow** (for application code). Write a failing test. See red. Implement. See green. Refactor.
 - **Never fake a test.** No empty bodies, no `pass`, no `assert True`, no placeholder assertions.
 - **Read before writing.** Never modify code you haven't read.
 - **Minimum viable change.** Do what was asked, nothing more.
@@ -95,8 +107,8 @@ curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/inst
 | Tool | Integration |
 |---|---|
 | **Claude Code** | Reads `CLAUDE.md` → `agents.md` automatically |
-| **Cursor** | Point `.cursorrules` at `agents.md` |
-| **Windsurf** | Point `.windsurfrules` at `agents.md` |
+| **Cursor** | Run with `--cursor` flag, or point `.cursorrules` at `agents.md` manually |
+| **Windsurf** | Run with `--windsurf` flag, or point `.windsurfrules` at `agents.md` manually |
 | **Other** | Reference `agents.md` in your tool's context configuration |
 
 ## Contributing

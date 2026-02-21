@@ -1,6 +1,6 @@
 # Rust Testing
 
-**Principle:** Tests are first-class citizens in Rust. The language has built-in testing infrastructure — use it. Unit tests live next to the code they test, integration tests exercise the public API, and doc tests keep your examples honest. TDD is the default workflow (see [docs/engineering/testing.md](../../engineering/testing.md) for the protocol).
+**Principle:** Tests are first-class citizens in Rust. The language has built-in testing infrastructure — use it. Unit tests live next to the code they test, integration tests exercise the public API, and doc tests keep your examples honest. See `docs/engineering/testing.md` for the TDD protocol.
 
 ---
 
@@ -145,22 +145,9 @@ proptest! {
 }
 ```
 
-### 6. TDD Is the Default Workflow
+### 6. TDD in Rust
 
-Every implementation follows the Red-Green-Refactor cycle defined in [docs/engineering/testing.md](../../engineering/testing.md). Write the test first. Watch it fail. Write the minimum implementation to pass. Refactor. This is not optional.
-
-```rust
-// Step 1: Write the test (RED — this won't even compile yet)
-#[test]
-fn parses_valid_email() {
-    let email = Email::parse("user@example.com").unwrap();
-    assert_eq!(email.domain(), "example.com");
-}
-
-// Step 2: Write the minimum implementation to pass (GREEN)
-// Step 3: Refactor while keeping tests green
-// Step 4: Write the next test
-```
+For the full red-green-refactor protocol, see `docs/engineering/testing.md`. In Rust, the "red" phase often means a compile error (the type or function doesn't exist yet). Define the type signature, then the minimal failing implementation, then make it green.
 
 ### 7. Use `mockall` for Trait Mocking
 

@@ -1,6 +1,6 @@
 # Python Testing Best Practices
 
-> **Principle:** Tests are executable specifications, not afterthoughts. Every test must assert something meaningful, every fixture must earn its existence, and the test suite must run fast enough that developers never skip it. TDD is the default workflow — write the test first, watch it fail, make it pass, refactor.
+> **Principle:** Tests are executable specifications, not afterthoughts. Every test must assert something meaningful, every fixture must earn its existence, and the test suite must run fast enough that developers never skip it. See `docs/engineering/testing.md` for the TDD protocol.
 
 ---
 
@@ -18,7 +18,7 @@
 
 6. **Use `pytest.mark.parametrize` for data-driven tests.** When the same logic needs testing with multiple inputs, parametrize avoids copy-paste test methods and clearly separates test logic from test data. Each parameter set gets its own test ID in the output.
 
-7. **TDD is the default workflow.** Write the failing test first. Watch it fail for the right reason. Write the minimum code to make it pass. Refactor. This is not optional — it is the standard engineering protocol. See `docs/engineering/testing.md` for the full TDD protocol, including the Red-Green-Refactor cycle and commit cadence.
+7. **TDD is the default workflow.** See `docs/engineering/testing.md` for the full red-green-refactor protocol.
 
 8. **CRITICAL: Never use `pass` in a test body.** A test function with `pass` as its body always passes. It tests absolutely nothing. It gives false confidence. It is worse than having no test at all because it inflates your test count and makes the suite look more comprehensive than it is. If you aren't ready to write the test, use `pytest.skip("TODO: implement")` or don't write the function.
 

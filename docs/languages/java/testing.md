@@ -1,6 +1,6 @@
 # Java Testing
 
-> **Principle:** Tests are executable specifications that prove your code works. JUnit 5 is the framework, AssertJ is the assertion language, Mockito isolates dependencies, and Testcontainers makes integration tests real. TDD is the default workflow (see [docs/engineering/testing.md](../../engineering/testing.md) for the protocol). Every test must be capable of failing -- if you remove the implementation and the test still passes, the test is broken.
+> **Principle:** JUnit 5 is the framework, AssertJ is the assertion language, Mockito isolates dependencies, and Testcontainers makes integration tests real. See `docs/engineering/testing.md` for the TDD protocol.
 
 ---
 
@@ -243,9 +243,9 @@ class UserRepositoryIntegrationTest {
 class UserRepositoryTest { /* ... */ }
 ```
 
-### 8. TDD Is the Default Workflow
+### 8. TDD in Java
 
-Every implementation follows Red-Green-Refactor. Write a failing test first. Make it pass with the minimum implementation. Refactor while green. This is the protocol defined in [docs/engineering/testing.md](../../engineering/testing.md). In Java, TDD works naturally with interfaces: define the contract (interface), write the test against the contract, then implement the class. The test compiles before the implementation exists because it programs to the interface.
+For the full red-green-refactor protocol, see `docs/engineering/testing.md`. In Java, TDD works naturally with interfaces: define the contract, write the test against the contract, then implement the class.
 
 ### 9. Use `@BeforeEach`, Not `@Before`
 

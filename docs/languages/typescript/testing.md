@@ -186,35 +186,9 @@ describe("GET /api/users/:id", () => {
 });
 ```
 
-### 7. TDD Is the Default Workflow
+### 7. TDD in TypeScript
 
-Every implementation starts with a failing test. See `docs/engineering/testing.md` for the full red-green-refactor protocol. In TypeScript specifically, this means:
-
-1. Write the test with proper types — import the function that doesn't exist yet
-2. See the compile error (this is your "red" — the function/type doesn't exist)
-3. Create the type signature and minimal implementation to compile and fail the runtime assertion
-4. Run the test — confirm it fails for the right reason (the assertion, not a compile error)
-5. Implement until green
-6. Refactor
-
-```typescript
-// Step 1: Write the test (the import will be red)
-import { calculateDiscount } from "../pricing";
-
-it("applies a 10% discount for orders over $100", () => {
-  const result = calculateDiscount({ subtotal: 150, code: "SAVE10" });
-  expect(result).toBe(15);
-});
-
-// Step 2-3: Create the function with correct types, minimal implementation
-export function calculateDiscount(order: { subtotal: number; code: string }): number {
-  return 0; // Will fail the test — good
-}
-
-// Step 4: Run test, confirm it fails (expected 15, got 0)
-// Step 5: Implement
-// Step 6: Refactor
-```
+For the full red-green-refactor protocol, see `docs/engineering/testing.md`. TypeScript-specific note: your "red" phase often starts with a compile error (importing a function that doesn't exist yet). Create the type signature first, then the minimal failing implementation, then make it green.
 
 ### 8. Never Use `as any` in Tests to Bypass Type Errors
 

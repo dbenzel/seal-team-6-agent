@@ -4,6 +4,10 @@
 
 ---
 
+**Relationship to Operating Principle #3 (Minimum Viable Change):** The boy scout rule operates *within* the blast radius of your current change. You may improve code in a function you're already modifying. You may NOT modify other files or add scope that wasn't requested. When in doubt, flag the issue to the user rather than fixing it silently.
+
+---
+
 ## Rules
 
 ### 1. The Boy Scout Rule — Leave It Better Than You Found It

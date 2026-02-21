@@ -225,7 +225,7 @@ on("literally anything", noop); // No compile-time feedback
 
 ### 10. Avoid Class Inheritance — Prefer Composition
 
-Deep class hierarchies are brittle, hard to test, and create tight coupling. Prefer composition: small interfaces, plain objects, and functions that combine behaviors.
+Prefer composition with small interfaces, plain objects, and functions. See `docs/engineering/architecture.md` (Rule 2, Open/Closed) for the principle.
 
 ```typescript
 // Do: Composition with interfaces and functions

@@ -1,6 +1,6 @@
 # C# Testing
 
-**Principle:** TDD is the default workflow. xUnit is the framework, FluentAssertions is the assertion language, NSubstitute isolates dependencies, and Testcontainers makes integration tests real. Every test must be capable of failing — if you remove the implementation and the test still passes, the test is broken. See `docs/engineering/testing.md` for the full TDD protocol.
+**Principle:** xUnit is the framework, FluentAssertions is the assertion language, NSubstitute isolates dependencies, and Testcontainers makes integration tests real. See `docs/engineering/testing.md` for the TDD protocol.
 
 ---
 

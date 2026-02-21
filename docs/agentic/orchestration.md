@@ -120,9 +120,9 @@ This document set (`agents.md` + `docs/`) is itself an example of the reference 
    - One-sentence summary of each referenced doc (enough to decide whether to load it)
    - Operating principles (always-applicable rules)
 
-2. **Layer 1 (agentic)** — 5 files, always loaded. These are behavioral, not informational — the agent needs them to operate correctly.
+2. **Layer 1 (agentic)** — 7 files. Guardrails are always loaded; the rest are loaded as they become relevant to the current task (see Loading Strategy in `agents.md`).
 
-3. **Layer 2 (engineering)** — 7 files, always loaded. Generic principles that apply regardless of language.
+3. **Layer 2 (engineering)** — 7 files. Testing and code-quality are loaded for code tasks; the rest are loaded on demand (see Loading Strategy in `agents.md`).
 
 4. **Layer 3 (languages)** — Loaded conditionally per stack. A Python project never loads the Rust guide. A polyglot project loads multiple.
 

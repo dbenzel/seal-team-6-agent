@@ -10,6 +10,19 @@ You are operating in a repository augmented with **seal-team-6** best practices.
 
 ---
 
+## Conflict Resolution
+
+When guidance from different sources conflicts, apply this priority:
+
+1. **`.seal-team-6-overrides.md`** — explicit project overrides always win
+2. **Existing codebase patterns** — for style, naming, file organization, and established architecture
+3. **Seal-team-6 principles** — for new code, TDD workflow, security, and quality standards
+4. **More specific over more general** — a language guide overrides an engineering principle; a scoped rule overrides a universal one
+
+When writing new code, follow seal-team-6 standards. When modifying existing code, match surrounding style, then apply seal-team-6 where it doesn't conflict. Exception: security vulnerabilities and actively harmful patterns — seal-team-6 always overrides.
+
+---
+
 ## Stack Detection
 
 Inspect the project root for these markers and load the corresponding language-specific guides. Load **all** matching guides — polyglot repos are common.
@@ -60,7 +73,7 @@ Language-agnostic software engineering fundamentals. These are the "what" — th
 Naming, formatting, simplicity, and readability. The baseline for all code you write or modify.
 
 ### Testing & TDD — `docs/engineering/testing.md`
-**Test-Driven Development is the default workflow.** Write a failing test first. Run it. See red. Implement until green. Refactor. Never fake a passing test — no empty test bodies, no `pass`, no placeholder assertions. See this doc for the full TDD protocol, coverage philosophy, and testing pyramid.
+TDD workflow, testing pyramid, coverage philosophy, and rules against faking tests. See this doc for the full protocol.
 
 ### Architecture — `docs/engineering/architecture.md`
 Design patterns, separation of concerns, SOLID principles, and when to apply (or avoid) abstraction.
@@ -91,15 +104,37 @@ See the `docs/languages/` directory for available language guides.
 
 ---
 
+## Loading Strategy
+
+Do not load all documents upfront. Scale context to the task:
+
+| Always load | Load for code tasks | Load on demand |
+|---|---|---|
+| This file (`agents.md`) | `docs/agentic/task-decomposition.md` | `docs/agentic/context-management.md` |
+| `docs/agentic/guardrails.md` | `docs/agentic/tool-usage.md` | `docs/agentic/orchestration.md` |
+| | `docs/agentic/verification.md` | `docs/agentic/continuous-improvement.md` |
+| | `docs/engineering/testing.md` | `docs/engineering/architecture.md` |
+| | `docs/engineering/code-quality.md` | `docs/engineering/security.md` |
+| | Language guides (per stack detection) | `docs/engineering/git-workflow.md` |
+| | | `docs/engineering/error-handling.md` |
+| | | `docs/engineering/performance.md` |
+
+**Always load:** Read for every task. These define safety boundaries and operating context.
+**Load for code tasks:** Read when writing or modifying code.
+**Load on demand:** Follow the reference when the task involves that specific topic.
+
+---
+
 ## Operating Principles
 
 These are the meta-rules that govern how you apply everything above:
 
-1. **Test first, always.** Write a failing test before writing implementation code. Run it. See it fail. Then make it pass. Never fake a green test — no empty bodies, no `pass`, no `assert True`, no skipped assertions. A test that can't fail is not a test.
+1. **Test first, always** (for application code). Write a failing test before writing implementation code. Run it. See it fail. Then make it pass. Never fake a green test — no empty bodies, no `pass`, no `assert True`, no skipped assertions. For non-code changes (config, CI, docs), verify your work through other means — see `docs/engineering/testing.md`.
 2. **Read before writing.** Never modify code you haven't read. Understand context before suggesting changes.
-3. **Minimum viable change.** Do exactly what was asked. Don't refactor adjacent code, add features, or "improve" things that weren't requested.
+3. **Minimum viable change.** Do exactly what was asked. Don't refactor adjacent code, add features, or "improve" things that weren't requested — with one exception: small, safe, contained cleanups (< 10 lines, same file, covered by tests) within code you're already modifying. See `docs/agentic/continuous-improvement.md` for the boundary.
 4. **Verify your work.** Run tests, check types, confirm builds. Don't declare success without evidence.
 5. **Ask when uncertain.** A clarifying question costs seconds. A wrong assumption costs minutes to hours.
 6. **Respect existing patterns.** Match the codebase's style, conventions, and architecture — even if you'd do it differently in a greenfield project.
 7. **Think in blast radius.** Before any action, consider: what's the worst case if this goes wrong? Scale your caution to match.
-8. **Progress over perfection.** Ship working increments. Don't block on getting everything perfect in one pass.
+8. **Think, then act.** For non-trivial tasks, structure your approach before executing: (1) state your understanding of the task, (2) identify which files to read, (3) plan changes, (4) execute, (5) verify. Structured reasoning catches assumptions.
+9. **Progress over perfection.** Ship working increments. Don't block on getting everything perfect in one pass.

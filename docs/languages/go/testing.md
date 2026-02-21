@@ -217,18 +217,9 @@ func TestUserRepository_Postgres(t *testing.T) {
 }
 ```
 
-### 8. TDD Is the Default Workflow
+### 8. TDD in Go
 
-Every implementation starts with a failing test. This is the non-negotiable protocol from `docs/engineering/testing.md`, applied in Go:
-
-1. Write a test function or add a table-driven case
-2. Run `go test ./...` — it must fail (red)
-3. Write the minimum implementation to make it pass
-4. Run `go test ./...` — it must pass (green)
-5. Refactor with tests green
-6. Repeat
-
-Never write implementation without a failing test. Never commit with failing tests.
+For the full red-green-refactor protocol, see `docs/engineering/testing.md`. In Go, TDD typically means adding a table-driven test case first, running `go test ./...` to see it fail, then implementing.
 
 ### 9. Use `t.Run` for Subtests
 

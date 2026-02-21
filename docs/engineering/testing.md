@@ -112,7 +112,21 @@ Invest testing effort proportionally:
 - Framework boilerplate (config files, route declarations with no custom logic)
 - One-off scripts that aren't part of the application
 
-### 6. Test Quality Standards
+### 6. When TDD Does Not Apply
+
+TDD is the default for application code. These contexts follow a different verification strategy:
+
+| Context | Verification Instead of TDD |
+|---|---|
+| Configuration (CI, Docker, infra) | Verify the build/deploy works |
+| Documentation | Review for accuracy and completeness |
+| Data migrations | Run against test data, verify results |
+| Dependency updates | Run the existing test suite, verify build |
+| One-off scripts | Test the script's output manually |
+
+The principle remains: **verify your work**. TDD is the *how* for application code. For other contexts, verification takes a different form — but skipping verification entirely is never acceptable.
+
+### 7. Test Quality Standards
 
 Each test should:
 - Have a descriptive name that reads as a specification

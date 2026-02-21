@@ -93,18 +93,34 @@ ${MARKER_END}"
 # --- Parse Arguments ---
 LANGUAGES="$ALL_LANGUAGES"
 
+CURSOR=false
+WINDSURF=false
+
 for arg in "$@"; do
   case "$arg" in
     --lang=*)
       LANGUAGES=$(echo "${arg#--lang=}" | tr ',' ' ')
       ;;
+    --version=*)
+      BRANCH="${arg#--version=}"
+      BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
+      ;;
+    --cursor)
+      CURSOR=true
+      ;;
+    --windsurf)
+      WINDSURF=true
+      ;;
     --help|-h)
-      echo "Usage: install.sh [--lang=typescript,python,go,rust,java]"
+      echo "Usage: install.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --lang=LANGS   Comma-separated list of language guides to install"
-      echo "                 Default: all (typescript,python,go,rust,java)"
-      echo "  --help         Show this help message"
+      echo "  --lang=LANGS      Comma-separated list of language guides to install"
+      echo "                    Default: all (typescript,python,go,rust,java,csharp)"
+      echo "  --version=TAG     Pin to a specific git tag or commit hash (default: main)"
+      echo "  --cursor          Generate .cursorrules with seal-team-6 reference"
+      echo "  --windsurf        Generate .windsurfrules with seal-team-6 reference"
+      echo "  --help            Show this help message"
       exit 0
       ;;
     *)
@@ -135,16 +151,26 @@ if command -v sed > /dev/null 2>&1; then
   sed -i.bak 's|`docs/agentic/|`docs/seal-team-6/agentic/|g' "${DOCS_DIR}/agents.md"
   sed -i.bak 's|`docs/engineering/|`docs/seal-team-6/engineering/|g' "${DOCS_DIR}/agents.md"
   sed -i.bak 's|`docs/languages/|`docs/seal-team-6/languages/|g' "${DOCS_DIR}/agents.md"
+  # Strip Operating Principles from canonical copy to avoid duplication with root agents.md
+  sed -i.bak '/^## Operating Principles$/,$ d' "${DOCS_DIR}/agents.md"
   rm -f "${DOCS_DIR}/agents.md.bak"
+fi
+
+# Verify path rewriting succeeded
+if ! grep -q 'docs/seal-team-6/' "${DOCS_DIR}/agents.md" 2>/dev/null; then
+  warn "Path rewriting may have failed — verify ${DOCS_DIR}/agents.md manually"
 fi
 
 # --- Inject reference into project root agents.md ---
 AGENTS_BLOCK="# Seal Team 6 — Agentic Best Practices
 
-Read and follow \`docs/seal-team-6/agents.md\` before all other guidance in this file.
-It contains foundational agentic principles, engineering best practices, and
-language-specific conventions. These take precedence and should guide the
-evolution of this codebase toward alignment with these standards.
+Read \`docs/seal-team-6/agents.md\` for foundational agentic principles,
+engineering best practices, and language-specific conventions.
+
+These guide new code toward alignment with proven standards.
+Existing project patterns are respected for established code —
+seal-team-6 only overrides for security issues or harmful patterns.
+See the Conflict Resolution section in the canonical file for priority rules.
 
 If \`.seal-team-6-overrides.md\` exists in the project root, its directives
 override specific seal-team-6 defaults while preserving the rest.
@@ -156,9 +182,11 @@ inject_reference "agents.md" "$AGENTS_BLOCK"
 # --- Inject reference into CLAUDE.md ---
 CLAUDE_BLOCK="# Seal Team 6
 
-Read \`docs/seal-team-6/agents.md\` for comprehensive agentic guidance.
-Read all files referenced within it before starting work. Pay special attention to:
-- \`docs/seal-team-6/agentic/guardrails.md\` — read before taking any actions
+Read \`docs/seal-team-6/agents.md\` — it is the entry point for all agentic guidance.
+Always read \`docs/seal-team-6/agentic/guardrails.md\` before taking any actions.
+Follow other references as they become relevant to your current task — do not pre-read all referenced files.
+
+Pay special attention to:
 - The stack detection table — load language guides matching this project's stack
 - \`.seal-team-6-overrides.md\` (if it exists) — local overrides take precedence
 
@@ -198,6 +226,17 @@ else
   ok "Existing .seal-team-6-overrides.md found — preserved."
 fi
 
+# --- Cursor / Windsurf (opt-in) ---
+TOOL_REFERENCE="Read and follow docs/seal-team-6/agents.md for agentic best practices."
+
+if [ "$CURSOR" = "true" ]; then
+  inject_reference ".cursorrules" "$TOOL_REFERENCE"
+fi
+
+if [ "$WINDSURF" = "true" ]; then
+  inject_reference ".windsurfrules" "$TOOL_REFERENCE"
+fi
+
 # --- Summary ---
 echo ""
 ok "seal-team-6 installed successfully!"
@@ -207,6 +246,12 @@ info "  ${DOCS_DIR}/agents.md  — Canonical agentic context"
 info "  ${DOCS_DIR}/            — Best practices documentation"
 info "  agents.md               — Injected reference (existing content preserved)"
 info "  CLAUDE.md               — Injected reference (existing content preserved)"
+if [ "$CURSOR" = "true" ]; then
+  info "  .cursorrules            — Cursor integration"
+fi
+if [ "$WINDSURF" = "true" ]; then
+  info "  .windsurfrules          — Windsurf integration"
+fi
 
 INSTALLED_LANGS=""
 for lang in $LANGUAGES; do
@@ -219,4 +264,5 @@ if [ -n "$INSTALLED_LANGS" ]; then
 fi
 
 echo ""
+info "Recommended: commit docs/seal-team-6/ to version control so all team members share the same standards."
 info "To update, re-run this script. To customize, edit .seal-team-6-overrides.md"
