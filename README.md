@@ -1,8 +1,8 @@
 # Seal Team 6 — Agentic Best Practices
 
-Battle-tested guardrails and best practices for AI-assisted software engineering. One command drops proven agentic guidance into any project.
+Battle-tested guardrails and best practices for AI-assisted software engineering. One command drops proven agentic guidance into any project — and keeps improving it over time.
 
-Think of it as a **package manager for agentic context** — replicate successful patterns without manual duplication.
+Think of it as a **package manager for agentic context** — replicate successful patterns without manual duplication. But unlike a static config drop, seal-team-6 compounds: every interaction makes the codebase measurably better, with your consent at every step.
 
 ## Quick Start
 
@@ -24,6 +24,7 @@ This installs into your current project directory:
 - `docs/seal-team-6/` — Full best practices documentation (canonical source)
 - `agents.md` — If it exists, a seal-team-6 reference is **prepended** (existing content preserved). If not, one is created.
 - `CLAUDE.md` — Same behavior: inject reference at top, preserve existing content.
+- `.project-context.example.md` — Template for project-specific intelligence. Rename to `.project-context.md` and customize.
 
 ### Install Specific Languages Only
 
@@ -67,18 +68,19 @@ curl -fsSL .../install.sh | sh -s -- --cursor --windsurf
 agents.md (root)
 │
 ├── Layer 1: Agentic Guidance
-│   ├── guardrails.md            — Safety, blast radius, destructive action prevention
+│   ├── guardrails.md            — Safety, blast radius, scope negotiation
 │   ├── task-decomposition.md    — Breaking work into subtasks, planning
 │   ├── tool-usage.md            — Right tool for the job, parallelization
 │   ├── context-management.md    — Keeping context clean and relevant
 │   ├── verification.md          — Testing, validation, checking your work
 │   ├── orchestration.md         — Reference trees, sub-agent delegation, context budgeting
-│   └── continuous-improvement.md — Boy scout rule, opportunistic cleanup
+│   ├── continuous-improvement.md — Consent tiers, debt surfacing, non-regression ratchets
+│   └── health-snapshot.md       — Project health assessment (coverage, types, architecture)
 │
 ├── Layer 2: Engineering Principles (language-agnostic)
 │   ├── code-quality.md        — Naming, simplicity, readability
-│   ├── testing.md             — TDD protocol, testing pyramid, coverage
-│   ├── architecture.md        — SOLID, separation of concerns, abstractions
+│   ├── testing.md             — TDD protocol, testing pyramid, coverage assessment
+│   ├── architecture.md        — SOLID, separation of concerns, open/closed workflows
 │   ├── security.md            — OWASP, secrets, input validation
 │   ├── git-workflow.md        — Commits, branches, PRs
 │   ├── error-handling.md      — Error patterns, logging, recovery
@@ -95,12 +97,14 @@ agents.md (root)
 
 ### How It Works
 
-1. The installer **injects a reference block** at the top of your existing `agents.md` and `CLAUDE.md` (or creates them if they don't exist). Existing project-specific guidance is preserved below.
-2. The canonical `docs/seal-team-6/agents.md` instructs the agent to **detect your stack** (package.json → TypeScript, go.mod → Go, etc.)
-3. Seal-team-6 principles guide new code toward alignment with these standards; existing project patterns are respected for established code (see Conflict Resolution in `agents.md`)
-4. Existing project guidance is still respected — seal-team-6 only overrides when there's a security issue or actively harmful pattern
-5. If `.seal-team-6-overrides.md` exists, those directives override specific seal-team-6 defaults
-6. Re-running the installer updates the seal-team-6 block (between `<!-- BEGIN/END seal-team-6 -->` markers) without touching your content
+1. The installer **injects a reference block** at the top of your existing `agents.md` and `CLAUDE.md` (or creates them). Existing content is preserved.
+2. The canonical `agents.md` detects your stack (package.json → TypeScript, go.mod → Go, etc.) and loads the right language guides.
+3. New code follows seal-team-6 standards. Existing code is respected — seal-team-6 only overrides for security issues or harmful patterns.
+4. On first interaction, the agent **suggests a health snapshot** — an honest assessment of your project's test coverage, type safety, architecture, and security posture. You decide whether to run it.
+5. Every improvement the agent makes beyond your request is **visible in the task summary**. Small improvements (< 10 lines, same file) are reported. Larger changes require your approval first.
+6. Issues discovered along the way get tracked in `TECH_DEBT.md` — so findings persist across sessions instead of evaporating.
+7. `.project-context.md` **grows over time** as agents observe patterns and propose additions. It starts with your preferences and accumulates into a rich project-specific guide.
+8. **The ratchet only moves forward.** Coverage, type safety, and conventions don't regress — agents flag any change that would weaken established protections.
 
 ### Key Opinions
 
@@ -109,25 +113,28 @@ agents.md (root)
 - **Read before writing.** Never modify code you haven't read.
 - **Minimum viable change.** Do what was asked, nothing more.
 - **Ask when uncertain.** A clarifying question costs seconds; a wrong assumption costs hours.
+- **Every improvement is visible.** No silent scope expansion. Agents report everything they changed beyond your request.
+- **Coverage is honest.** If you don't know your coverage number, you have a coverage problem. Measure it, track it, improve it.
+- **The ratchet only moves forward.** Tests don't regress. Types don't loosen. Safety checks don't disappear.
 
-## Customization
+## Project Context
 
-Copy the override template and edit:
+Your project's `.project-context.md` is a living document — not just configuration, but accumulated intelligence. Start with preferences, grow into a project-specific guide:
 
 ```bash
-cp .seal-team-6-overrides.example.md .seal-team-6-overrides.md
+cp .project-context.example.md .project-context.md
 ```
 
 ```powershell
 # Windows
-Copy-Item .seal-team-6-overrides.example.md .seal-team-6-overrides.md
+Copy-Item .project-context.example.md .project-context.md
 ```
 
-Override any section — unaddressed topics fall through to defaults. See the template for examples.
+It covers: testing conventions, coverage targets, architecture rules, agent improvement scope, and **learned patterns** that agents discover over time. See the template for examples.
 
 ## Updating
 
-Re-run the install command. It's idempotent — the seal-team-6 reference block in `agents.md`/`CLAUDE.md` is updated in place (between the `<!-- BEGIN/END seal-team-6 -->` markers), `docs/seal-team-6/` is refreshed, and your project-specific content + `.seal-team-6-overrides.md` are preserved.
+Re-run the install command. It's idempotent — the seal-team-6 reference block in `agents.md`/`CLAUDE.md` is updated in place (between the `<!-- BEGIN/END seal-team-6 -->` markers), `docs/seal-team-6/` is refreshed, and your project-specific content + `.project-context.md` are preserved. Your project's accumulated intelligence stays intact.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh

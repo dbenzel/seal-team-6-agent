@@ -4,9 +4,9 @@ You are operating in a repository augmented with **seal-team-6** best practices.
 
 ---
 
-## Override Detection
+## Project Context Detection
 
-**Before applying any defaults below**, check for a `.seal-team-6-overrides.md` file in the project root. If it exists, its directives take precedence over the corresponding defaults in this document and its referenced files. Apply overrides selectively — unaddressed topics still fall through to these defaults.
+**Before applying any defaults below**, check for a `.project-context.md` file in the project root. If it exists, its directives take precedence over the corresponding defaults in this document and its referenced files. Apply context directives selectively — unaddressed topics still fall through to these defaults. Also check for `TECH_DEBT.md` — if it exists, read it when working in related modules for cross-session continuity.
 
 ---
 
@@ -14,7 +14,7 @@ You are operating in a repository augmented with **seal-team-6** best practices.
 
 When guidance from different sources conflicts, apply this priority:
 
-1. **`.seal-team-6-overrides.md`** — explicit project overrides always win
+1. **`.project-context.md`** — explicit project context always wins
 2. **Existing codebase patterns** — for style, naming, file organization, and established architecture
 3. **Seal-team-6 principles** — for new code, TDD workflow, security, and quality standards
 4. **More specific over more general** — a language guide overrides an engineering principle; a scoped rule overrides a universal one
@@ -61,7 +61,10 @@ How to check your own work. Covers testing after changes, validation strategies,
 How to structure and consume guidance efficiently. Covers reference tree design (load root, follow selectively), sub-agent orchestration (when to spawn, how to scope), context budgeting, and parallel delegation. This framework itself is an example of the pattern.
 
 ### Continuous Improvement — `docs/agentic/continuous-improvement.md`
-The codebase should be measurably better after every interaction. When you're already modifying a file, make small safe improvements to adjacent code. Flag larger issues you can't fix inline. Prioritize security, then test coverage, then type safety, then clarity. Never regress.
+The codebase should be measurably better after every interaction. When you're already modifying a file, make small safe improvements to adjacent code — and report them. Flag larger issues to `TECH_DEBT.md`. Prioritize security, then test coverage, then type safety, then clarity. Never regress.
+
+### Health Snapshot — `docs/agentic/health-snapshot.md`
+Structured protocol for honestly assessing a project's current state: test coverage, type safety, architecture, security, and error handling. User-initiated or agent-suggested on first interaction. Read-only analysis — all recommended actions require user approval.
 
 ---
 
@@ -113,6 +116,7 @@ Do not load all documents upfront. Scale context to the task:
 | This file (`agents.md`) | `docs/agentic/task-decomposition.md` | `docs/agentic/context-management.md` |
 | `docs/agentic/guardrails.md` | `docs/agentic/tool-usage.md` | `docs/agentic/orchestration.md` |
 | | `docs/agentic/verification.md` | `docs/agentic/continuous-improvement.md` |
+| | | `docs/agentic/health-snapshot.md` |
 | | `docs/engineering/testing.md` | `docs/engineering/architecture.md` |
 | | `docs/engineering/code-quality.md` | `docs/engineering/security.md` |
 | | Language guides (per stack detection) | `docs/engineering/git-workflow.md` |
@@ -131,7 +135,7 @@ These are the meta-rules that govern how you apply everything above:
 
 1. **Test first, always** (for application code). Write a failing test before writing implementation code. Run it. See it fail. Then make it pass. Never fake a green test — no empty bodies, no `pass`, no `assert True`, no skipped assertions. For non-code changes (config, CI, docs), verify your work through other means — see `docs/engineering/testing.md`.
 2. **Read before writing.** Never modify code you haven't read. Understand context before suggesting changes.
-3. **Minimum viable change.** Do exactly what was asked. Don't refactor adjacent code, add features, or "improve" things that weren't requested — with one exception: small, safe, contained cleanups (< 10 lines, same file, covered by tests) within code you're already modifying. See `docs/agentic/continuous-improvement.md` for the boundary.
+3. **Minimum viable change.** Do exactly what was asked. Don't refactor adjacent code, add features, or "improve" things that weren't requested — with one exception: small, safe, contained cleanups (< 10 lines, same file, covered by tests) within code you're already modifying. These must be **reported in your task summary** — no invisible changes. See `docs/agentic/continuous-improvement.md` for the consent tiers.
 4. **Verify your work.** Run tests, check types, confirm builds. Don't declare success without evidence.
 5. **Ask when uncertain.** A clarifying question costs seconds. A wrong assumption costs minutes to hours.
 6. **Respect existing patterns.** Match the codebase's style, conventions, and architecture — even if you'd do it differently in a greenfield project.

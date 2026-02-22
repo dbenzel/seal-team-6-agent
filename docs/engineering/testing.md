@@ -166,3 +166,52 @@ When working as an agent, TDD looks like this:
 | Test the mock instead of the code | Mocks should simulate dependencies, not replace the SUT |
 | Ignore flaky tests | Fix them immediately — flaky tests erode trust in the suite |
 | Write tests that take seconds each | Keep unit tests in milliseconds; optimize slow tests |
+
+---
+
+## Assessing & Improving Existing Coverage
+
+TDD governs new code. But most projects have existing code with gaps. This section addresses how to honestly assess coverage and systematically improve it.
+
+### Measuring Coverage
+
+Run coverage tools — the specific tool depends on the language (see language-specific guides in `docs/languages/`). Report:
+
+- **Line coverage** — Which lines execute during tests. The baseline metric.
+- **Branch coverage** — Whether both sides of every conditional are tested. More meaningful than line coverage alone.
+- **Mutation testing** (stretch goal) — Whether tests actually catch bugs, not just execute code. High line coverage with low mutation scores means your tests run the code but don't assert on the results.
+
+**A project that doesn't know its coverage number has a coverage problem.** The first step is always: measure. Record the baseline in `.project-context.md` so future sessions can track progress.
+
+### Identifying High-Risk Gaps
+
+Not all untested code is equally dangerous. When prioritizing what to test first:
+
+| Priority | Risk Factor | Why |
+|---|---|---|
+| 1 | **Blast radius** | Code called by many modules — a bug here cascades. Test high-fanout code first. |
+| 2 | **Domain criticality** | Auth, payments, data persistence, external integrations. A bug here has real-world consequences. |
+| 3 | **Change frequency** | Frequently modified untested code is a live risk. Check `git log --stat` — files that change often without tests are ticking. |
+| 4 | **Complexity** | High cyclomatic complexity + no tests = high probability of hidden bugs. Simple getters can wait. |
+
+Stable, low-complexity, leaf-node code with no tests is dormant risk — worth tracking but not urgent.
+
+### Coverage Improvement Protocol
+
+This is always a **user-initiated** effort. Agents suggest, users decide scope.
+
+1. **Establish baseline.** Run coverage. Record the number.
+2. **User defines scope.** "Cover the auth module," "add tests for the top 5 riskiest files," or "get to 60% coverage." Never start a coverage campaign without explicit scope.
+3. **Write characterization tests first.** Test existing behavior as-is — don't fix bugs or refactor while writing coverage. The goal is a safety net, not improvement.
+4. **Run coverage before and after.** Report the delta. "Auth module: 12% → 78% line coverage."
+5. **Never refactor untested code.** Test it first. Then refactor under test protection. This order is non-negotiable.
+6. **Record progress in `.project-context.md`.** Coverage milestones create a visible ratchet.
+
+### Coverage Targets
+
+This framework doesn't set a number — that belongs in `.project-context.md` where each project sets its own target. But the principle is clear:
+
+- Coverage should be **measured** (you know the number)
+- Coverage should be **tracked** (you know whether it's going up or down)
+- Coverage should be **trending upward** (the ratchet moves forward)
+- Coverage should **never silently decrease** (see Non-Regression Ratchets in `docs/agentic/continuous-improvement.md`)

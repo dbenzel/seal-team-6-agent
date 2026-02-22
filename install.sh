@@ -172,8 +172,8 @@ Existing project patterns are respected for established code —
 seal-team-6 only overrides for security issues or harmful patterns.
 See the Conflict Resolution section in the canonical file for priority rules.
 
-If \`.seal-team-6-overrides.md\` exists in the project root, its directives
-override specific seal-team-6 defaults while preserving the rest.
+If \`.project-context.md\` exists in the project root, its directives
+extend or override specific seal-team-6 defaults while preserving the rest.
 
 ---"
 
@@ -188,7 +188,7 @@ Follow other references as they become relevant to your current task — do not 
 
 Pay special attention to:
 - The stack detection table — load language guides matching this project's stack
-- \`.seal-team-6-overrides.md\` (if it exists) — local overrides take precedence
+- \`.project-context.md\` (if it exists) — project-specific context takes precedence
 
 ---"
 
@@ -196,7 +196,7 @@ inject_reference "CLAUDE.md" "$CLAUDE_BLOCK"
 
 # --- Download Agentic Guidance (Layer 1) ---
 info "Downloading agentic guidance..."
-AGENTIC_FILES="guardrails.md task-decomposition.md tool-usage.md context-management.md verification.md orchestration.md continuous-improvement.md"
+AGENTIC_FILES="guardrails.md task-decomposition.md tool-usage.md context-management.md verification.md orchestration.md continuous-improvement.md health-snapshot.md"
 for file in $AGENTIC_FILES; do
   download "${BASE_URL}/docs/agentic/${file}" "${DOCS_DIR}/agentic/${file}"
 done
@@ -217,13 +217,13 @@ for lang in $LANGUAGES; do
   done
 done
 
-# --- Override Template ---
-if [ ! -f ".seal-team-6-overrides.md" ]; then
-  download "${BASE_URL}/docs/overrides.example.md" ".seal-team-6-overrides.example.md"
-  info "Override template saved as .seal-team-6-overrides.example.md"
-  info "Rename to .seal-team-6-overrides.md and edit to customize."
+# --- Project Context Template ---
+if [ ! -f ".project-context.md" ]; then
+  download "${BASE_URL}/docs/project-context.example.md" ".project-context.example.md"
+  info "Project context template saved as .project-context.example.md"
+  info "Rename to .project-context.md and edit to customize."
 else
-  ok "Existing .seal-team-6-overrides.md found — preserved."
+  ok "Existing .project-context.md found — preserved."
 fi
 
 # --- Cursor / Windsurf (opt-in) ---
@@ -265,4 +265,4 @@ fi
 
 echo ""
 info "Recommended: commit docs/seal-team-6/ to version control so all team members share the same standards."
-info "To update, re-run this script. To customize, edit .seal-team-6-overrides.md"
+info "To update, re-run this script. To customize, edit .project-context.md"

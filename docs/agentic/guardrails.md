@@ -68,6 +68,15 @@ If a safety check fails, fix the root cause. The check exists for a reason.
 - You're unsure about requirements and a wrong guess would be costly
 - The codebase is in a state you don't understand
 
+### 7. Scope Clarity
+
+Before starting non-trivial work, establish what's in scope and what's not.
+
+- **State your understanding:** "I'll fix the login validation bug in `auth.ts`. I won't modify the session management or add new tests for existing code unless you want me to."
+- **When you discover adjacent problems:** Flag them distinctly from your primary task. Don't weave them into your work without signaling. Use the debt surfacing protocol in `docs/agentic/continuous-improvement.md`.
+- **Scope expansion requires acknowledgment:** If while working you realize the task is larger than expected, pause and tell the user before expanding. "This bug traces back to a shared utility — fixing it properly requires also changing `utils/validation.ts`. Want me to proceed, or should I apply a narrow fix?"
+- **Don't expand silently.** Even small scope creep compounds across tasks. If your change touches files or modules beyond what was discussed, flag it.
+
 ---
 
 ## Anti-Patterns
