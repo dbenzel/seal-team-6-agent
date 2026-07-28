@@ -7,7 +7,7 @@
 .EXAMPLE
     irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1 | iex
 .EXAMPLE
-    .\install.ps1 -Lang typescript,python
+    .\install.ps1 -Lang typescript,python -Version v1.1.0 -Cursor
 #>
 
 param(
@@ -56,7 +56,6 @@ function Read-FileContent {
     )
 }
 
-# --- Helpers ---
 function Write-Info {
     param([string]$Message)
     Write-Host "[seal-team-6] " -ForegroundColor Blue -NoNewline
@@ -93,9 +92,6 @@ function Download-File {
     }
 }
 
-# Inject a seal-team-6 reference block at the top of a file.
-# If the file already has a seal-team-6 block, replace it.
-# If the file doesn't exist, create it with just the block.
 function Inject-Reference {
     param(
         [string]$File,
@@ -112,7 +108,6 @@ function Inject-Reference {
     $content = Read-FileContent $File
 
     if ($content -match [regex]::Escape($MarkerBegin)) {
-        # Replace existing block between markers
         $pattern = [regex]::Escape($MarkerBegin) + "[\s\S]*?" + [regex]::Escape($MarkerEnd)
         $existingContent = ($content -replace $pattern, "").TrimStart("`r`n").TrimStart("`n")
         if ($existingContent) {
@@ -124,11 +119,44 @@ function Inject-Reference {
         Write-Info "Updated seal-team-6 reference in $File"
     }
     else {
-        # No existing block — prepend to existing content
         $newContent = "$injected`n`n$content"
         Write-FileContent $File $newContent
         Write-Info "Injected seal-team-6 reference at top of $File"
     }
+}
+
+function Detect-Languages {
+    $found = New-Object System.Collections.Generic.List[string]
+    if ((Test-Path "package.json") -or (Test-Path "tsconfig.json")) { [void]$found.Add("typescript") }
+    if ((Test-Path "pyproject.toml") -or (Test-Path "setup.py") -or (Test-Path "requirements.txt")) { [void]$found.Add("python") }
+    if (Test-Path "go.mod") { [void]$found.Add("go") }
+    if (Test-Path "Cargo.toml") { [void]$found.Add("rust") }
+    if ((Test-Path "pom.xml") -or (Test-Path "build.gradle") -or (Test-Path "build.gradle.kts")) { [void]$found.Add("java") }
+    if ((Test-Path "global.json") -or (Get-ChildItem -Path . -Filter *.csproj -File -ErrorAction SilentlyContinue) -or (Get-ChildItem -Path . -Filter *.sln -File -ErrorAction SilentlyContinue)) {
+        [void]$found.Add("csharp")
+    }
+    return ,$found.ToArray()
+}
+
+function Write-CursorRule {
+    $dir = ".cursor/rules"
+    $file = Join-Path $dir "seal-team-6.mdc"
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    $content = @'
+---
+description: Seal Team 6 agentic best practices entrypoint
+alwaysApply: true
+---
+
+Read `docs/seal-team-6/agents.md` for agentic principles, engineering standards, and language guides.
+Always read `docs/seal-team-6/agentic/guardrails.md` before destructive or high-blast-radius actions.
+Do not pre-read every referenced file — follow the Loading Strategy in the entrypoint.
+If `.project-context.md` exists, its directives take precedence for matching topics.
+'@
+    Write-FileContent $file $content
+    Write-Info "Wrote $file (Cursor rules)"
 }
 
 # --- Help ---
@@ -136,20 +164,37 @@ if ($Help) {
     Write-Host "Usage: install.ps1 [OPTIONS]"
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Lang LANGS       Comma-separated list of language guides to install"
-    Write-Host "                    Default: all (typescript,python,go,rust,java,csharp)"
-    Write-Host "  -Version TAG      Pin to a specific git tag or commit hash (default: main)"
-    Write-Host "  -Cursor           Generate .cursorrules with seal-team-6 reference"
-    Write-Host "  -Windsurf         Generate .windsurfrules with seal-team-6 reference"
+    Write-Host "  -Lang LANGS       Comma-separated language guides, or 'all'"
+    Write-Host "                    Default: auto-detect from project markers"
+    Write-Host "                    Available: typescript,python,go,rust,java,csharp"
+    Write-Host "  -Version TAG      Pin to a git tag or commit (recommended; default: main)"
+    Write-Host "  -Cursor           Write .cursor/rules/seal-team-6.mdc"
+    Write-Host "  -Windsurf         Inject reference into .windsurfrules"
     Write-Host "  -Help             Show this help message"
     exit 0
 }
 
 # --- Parse Languages ---
-if ($Lang) {
-    $Languages = $Lang -split ","
-} else {
+if ($Lang -eq "all") {
     $Languages = $AllLanguages
+    Write-Info "Installing all language guides"
+}
+elseif ($Lang) {
+    $Languages = @($Lang -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+}
+else {
+    $Languages = Detect-Languages
+    if ($Languages.Count -eq 0) {
+        Write-Warn "No language markers detected — skipping Layer 3 language guides."
+        Write-Warn "Pass -Lang typescript,python or -Lang all to install them."
+    }
+    else {
+        Write-Info ("Auto-detected languages: " + ($Languages -join " "))
+    }
+}
+
+if ($Version -eq "main") {
+    Write-Warn "Installing from floating 'main'. Prefer -Version <tag> once releases exist (see CHANGELOG.md)."
 }
 
 # --- Pre-flight Checks ---
@@ -177,13 +222,11 @@ Write-Info "Installing seal-team-6 agentic best practices..."
 Write-Info "Downloading canonical context file..."
 Download-File "$BaseUrl/agents.md" "$DocsDir/agents.md"
 
-# Rewrite docs/ paths in the canonical copy to be relative from docs/seal-team-6/
 $agentsContent = Read-FileContent "$DocsDir/agents.md"
 $agentsContent = $agentsContent -replace '`docs/agentic/', '`docs/seal-team-6/agentic/'
 $agentsContent = $agentsContent -replace '`docs/engineering/', '`docs/seal-team-6/engineering/'
 $agentsContent = $agentsContent -replace '`docs/languages/', '`docs/seal-team-6/languages/'
 
-# Strip Operating Principles from canonical copy to avoid duplication with root agents.md
 $opPrinciplesIndex = $agentsContent.IndexOf("## Operating Principles")
 if ($opPrinciplesIndex -ge 0) {
     $agentsContent = $agentsContent.Substring(0, $opPrinciplesIndex).TrimEnd()
@@ -191,13 +234,11 @@ if ($opPrinciplesIndex -ge 0) {
 
 Write-FileContent "$DocsDir/agents.md" "$agentsContent`n"
 
-# Verify path rewriting succeeded
 $verifyContent = Read-FileContent "$DocsDir/agents.md"
 if ($verifyContent -notmatch 'docs/seal-team-6/') {
     Write-Warn "Path rewriting may have failed — verify $DocsDir/agents.md manually"
 }
 
-# --- Inject reference into project root agents.md ---
 $agentsBlock = @'
 # Seal Team 6 — Agentic Best Practices
 
@@ -215,9 +256,9 @@ extend or override specific seal-team-6 defaults while preserving the rest.
 ---
 '@
 
+Inject-Reference "AGENTS.md" $agentsBlock
 Inject-Reference "agents.md" $agentsBlock
 
-# --- Inject reference into CLAUDE.md ---
 $claudeBlock = @'
 # Seal Team 6
 
@@ -234,16 +275,15 @@ Pay special attention to:
 
 Inject-Reference "CLAUDE.md" $claudeBlock
 
-# --- Download Agentic Guidance (Layer 1) ---
 Write-Info "Downloading agentic guidance..."
 $agenticFiles = @("guardrails.md", "task-decomposition.md", "tool-usage.md",
                    "context-management.md", "verification.md", "orchestration.md",
-                   "continuous-improvement.md", "health-snapshot.md")
+                   "continuous-improvement.md", "health-snapshot.md",
+                   "untrusted-input.md", "modes.md")
 foreach ($file in $agenticFiles) {
     Download-File "$BaseUrl/docs/agentic/$file" "$DocsDir/agentic/$file"
 }
 
-# --- Download Engineering Principles (Layer 2) ---
 Write-Info "Downloading engineering principles..."
 $engineeringFiles = @("code-quality.md", "testing.md", "architecture.md",
                        "security.md", "git-workflow.md", "error-handling.md",
@@ -252,7 +292,6 @@ foreach ($file in $engineeringFiles) {
     Download-File "$BaseUrl/docs/engineering/$file" "$DocsDir/engineering/$file"
 }
 
-# --- Download Language Guides (Layer 3) ---
 $langFiles = @("idioms.md", "testing.md", "tooling.md")
 foreach ($lang in $Languages) {
     Write-Info "Downloading $lang language guide..."
@@ -261,7 +300,6 @@ foreach ($lang in $Languages) {
     }
 }
 
-# --- Project Context Template ---
 if (-not (Test-Path ".project-context.md")) {
     Download-File "$BaseUrl/docs/project-context.example.md" ".project-context.example.md"
     Write-Info "Project context template saved as .project-context.example.md"
@@ -270,28 +308,29 @@ if (-not (Test-Path ".project-context.md")) {
     Write-Ok "Existing .project-context.md found — preserved."
 }
 
-# --- Cursor / Windsurf (opt-in) ---
-$toolReference = "Read and follow docs/seal-team-6/agents.md for agentic best practices."
+if (-not (Test-Path "TECH_DEBT.md")) {
+    Download-File "$BaseUrl/docs/tech-debt.example.md" "TECH_DEBT.example.md"
+    Write-Info "Debt template saved as TECH_DEBT.example.md (rename to TECH_DEBT.md to activate)."
+}
 
 if ($Cursor) {
-    Inject-Reference ".cursorrules" $toolReference
+    Write-CursorRule
 }
 
 if ($Windsurf) {
-    Inject-Reference ".windsurfrules" $toolReference
+    Inject-Reference ".windsurfrules" "Read and follow docs/seal-team-6/agents.md for agentic best practices."
 }
 
-# --- Summary ---
 Write-Host ""
 Write-Ok "seal-team-6 installed successfully!"
 Write-Host ""
 Write-Info "Installed files:"
 Write-Info "  $DocsDir/agents.md  — Canonical agentic context"
 Write-Info "  $DocsDir/            — Best practices documentation"
-Write-Info "  agents.md               — Injected reference (existing content preserved)"
+Write-Info "  AGENTS.md / agents.md   — Injected reference (existing content preserved)"
 Write-Info "  CLAUDE.md               — Injected reference (existing content preserved)"
 if ($Cursor) {
-    Write-Info "  .cursorrules            — Cursor integration"
+    Write-Info "  .cursor/rules/seal-team-6.mdc — Cursor integration"
 }
 if ($Windsurf) {
     Write-Info "  .windsurfrules          — Windsurf integration"
@@ -305,8 +344,10 @@ foreach ($lang in $Languages) {
 }
 if ($installedLangs.Count -gt 0) {
     Write-Info ("  Languages: " + ($installedLangs -join " "))
+} else {
+    Write-Info "  Languages: (none — use -Lang ...)"
 }
 
 Write-Host ""
 Write-Info "Recommended: commit docs/seal-team-6/ to version control so all team members share the same standards."
-Write-Info "To update, re-run this script. To customize, edit .project-context.md"
+Write-Info "Pin installs with -Version <tag>. Customize via .project-context.md"

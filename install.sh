@@ -1,7 +1,8 @@
 #!/bin/sh
 # Seal Team 6 — Agentic Best Practices Installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh
-# Or:    curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh -s -- --lang=typescript,python
+# Prefer: ... | sh -s -- --version=vX.Y.Z
+# Or:    ... | sh -s -- --lang=typescript,python
 
 set -e
 
@@ -61,28 +62,22 @@ ${block}
 ${MARKER_END}"
 
   if [ ! -f "$file" ]; then
-    # File doesn't exist — create with just the seal-team-6 block
     printf '%s\n' "$injected" > "$file"
     info "Created $file with seal-team-6 reference"
     return
   fi
 
-  # File exists — check if it already has a seal-team-6 block
   if grep -q "$MARKER_BEGIN" "$file" 2>/dev/null; then
-    # Replace existing block between markers
-    # Use awk to strip old block, then prepend new one
     local existing_content
     existing_content=$(awk "
       /$MARKER_BEGIN/{skip=1; next}
       /$MARKER_END/{skip=0; next}
       !skip{print}
     " "$file")
-    # Remove leading blank lines from existing content
     existing_content=$(echo "$existing_content" | sed '/./,$!d')
     printf '%s\n\n%s\n' "$injected" "$existing_content" > "$file"
     info "Updated seal-team-6 reference in $file"
   else
-    # No existing block — prepend to existing content
     local existing_content
     existing_content=$(cat "$file")
     printf '%s\n\n%s\n' "$injected" "$existing_content" > "$file"
@@ -90,20 +85,72 @@ ${MARKER_END}"
   fi
 }
 
-# --- Parse Arguments ---
-LANGUAGES="$ALL_LANGUAGES"
+detect_languages() {
+  local found=""
+  if [ -f "package.json" ] || [ -f "tsconfig.json" ]; then
+    found="$found typescript"
+  fi
+  if [ -f "pyproject.toml" ] || [ -f "setup.py" ] || [ -f "requirements.txt" ]; then
+    found="$found python"
+  fi
+  if [ -f "go.mod" ]; then
+    found="$found go"
+  fi
+  if [ -f "Cargo.toml" ]; then
+    found="$found rust"
+  fi
+  if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+    found="$found java"
+  fi
+  # C#: any .csproj / .sln / global.json in root
+  if [ -f "global.json" ] || ls ./*.csproj > /dev/null 2>&1 || ls ./*.sln > /dev/null 2>&1; then
+    found="$found csharp"
+  fi
+  # trim
+  echo "$found" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
 
+write_cursor_rule() {
+  local dir=".cursor/rules"
+  local file="${dir}/seal-team-6.mdc"
+  mkdir -p "$dir"
+  cat > "$file" <<'EOF'
+---
+description: Seal Team 6 agentic best practices entrypoint
+alwaysApply: true
+---
+
+Read `docs/seal-team-6/agents.md` for agentic principles, engineering standards, and language guides.
+Always read `docs/seal-team-6/agentic/guardrails.md` before destructive or high-blast-radius actions.
+Do not pre-read every referenced file — follow the Loading Strategy in the entrypoint.
+If `.project-context.md` exists, its directives take precedence for matching topics.
+EOF
+  info "Wrote $file (Cursor rules)"
+}
+
+# --- Parse Arguments ---
+LANG_MODE="auto" # auto | all | explicit
+LANGUAGES=""
 CURSOR=false
 WINDSURF=false
+VERSION_SET=false
 
 for arg in "$@"; do
   case "$arg" in
     --lang=*)
-      LANGUAGES=$(echo "${arg#--lang=}" | tr ',' ' ')
+      raw="${arg#--lang=}"
+      if [ "$raw" = "all" ]; then
+        LANG_MODE="all"
+        LANGUAGES="$ALL_LANGUAGES"
+      else
+        LANG_MODE="explicit"
+        LANGUAGES=$(echo "$raw" | tr ',' ' ')
+      fi
       ;;
     --version=*)
       BRANCH="${arg#--version=}"
       BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
+      VERSION_SET=true
       ;;
     --cursor)
       CURSOR=true
@@ -115,11 +162,12 @@ for arg in "$@"; do
       echo "Usage: install.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --lang=LANGS      Comma-separated list of language guides to install"
-      echo "                    Default: all (typescript,python,go,rust,java,csharp)"
-      echo "  --version=TAG     Pin to a specific git tag or commit hash (default: main)"
-      echo "  --cursor          Generate .cursorrules with seal-team-6 reference"
-      echo "  --windsurf        Generate .windsurfrules with seal-team-6 reference"
+      echo "  --lang=LANGS      Comma-separated language guides, or 'all'"
+      echo "                    Default: auto-detect from project markers"
+      echo "                    Available: typescript,python,go,rust,java,csharp"
+      echo "  --version=TAG     Pin to a git tag or commit (recommended; default: main)"
+      echo "  --cursor          Write .cursor/rules/seal-team-6.mdc"
+      echo "  --windsurf        Inject reference into .windsurfrules"
       echo "  --help            Show this help message"
       exit 0
       ;;
@@ -140,6 +188,22 @@ if [ ! -d ".git" ] && [ ! -f "package.json" ] && [ ! -f "pyproject.toml" ] && [ 
   esac
 fi
 
+if [ "$VERSION_SET" = "false" ]; then
+  warn "Installing from floating 'main'. Prefer --version=<tag> once releases exist (see CHANGELOG.md)."
+fi
+
+if [ "$LANG_MODE" = "auto" ]; then
+  LANGUAGES=$(detect_languages)
+  if [ -z "$LANGUAGES" ]; then
+    warn "No language markers detected — skipping Layer 3 language guides."
+    warn "Pass --lang=typescript,python or --lang=all to install them."
+  else
+    info "Auto-detected languages:${LANGUAGES}"
+  fi
+elif [ "$LANG_MODE" = "all" ]; then
+  info "Installing all language guides"
+fi
+
 info "Installing seal-team-6 agentic best practices..."
 
 # --- Download canonical agents.md into docs/seal-team-6/ ---
@@ -156,12 +220,11 @@ if command -v sed > /dev/null 2>&1; then
   rm -f "${DOCS_DIR}/agents.md.bak"
 fi
 
-# Verify path rewriting succeeded
 if ! grep -q 'docs/seal-team-6/' "${DOCS_DIR}/agents.md" 2>/dev/null; then
   warn "Path rewriting may have failed — verify ${DOCS_DIR}/agents.md manually"
 fi
 
-# --- Inject reference into project root agents.md ---
+# --- Inject reference into AGENTS.md and agents.md ---
 AGENTS_BLOCK="# Seal Team 6 — Agentic Best Practices
 
 Read \`docs/seal-team-6/agents.md\` for foundational agentic principles,
@@ -177,6 +240,7 @@ extend or override specific seal-team-6 defaults while preserving the rest.
 
 ---"
 
+inject_reference "AGENTS.md" "$AGENTS_BLOCK"
 inject_reference "agents.md" "$AGENTS_BLOCK"
 
 # --- Inject reference into CLAUDE.md ---
@@ -196,7 +260,7 @@ inject_reference "CLAUDE.md" "$CLAUDE_BLOCK"
 
 # --- Download Agentic Guidance (Layer 1) ---
 info "Downloading agentic guidance..."
-AGENTIC_FILES="guardrails.md task-decomposition.md tool-usage.md context-management.md verification.md orchestration.md continuous-improvement.md health-snapshot.md"
+AGENTIC_FILES="guardrails.md task-decomposition.md tool-usage.md context-management.md verification.md orchestration.md continuous-improvement.md health-snapshot.md untrusted-input.md modes.md"
 for file in $AGENTIC_FILES; do
   download "${BASE_URL}/docs/agentic/${file}" "${DOCS_DIR}/agentic/${file}"
 done
@@ -217,7 +281,7 @@ for lang in $LANGUAGES; do
   done
 done
 
-# --- Project Context Template ---
+# --- Project Context + debt template ---
 if [ ! -f ".project-context.md" ]; then
   download "${BASE_URL}/docs/project-context.example.md" ".project-context.example.md"
   info "Project context template saved as .project-context.example.md"
@@ -226,15 +290,18 @@ else
   ok "Existing .project-context.md found — preserved."
 fi
 
-# --- Cursor / Windsurf (opt-in) ---
-TOOL_REFERENCE="Read and follow docs/seal-team-6/agents.md for agentic best practices."
+if [ ! -f "TECH_DEBT.md" ]; then
+  download "${BASE_URL}/docs/tech-debt.example.md" "TECH_DEBT.example.md"
+  info "Debt template saved as TECH_DEBT.example.md (rename to TECH_DEBT.md to activate)."
+fi
 
+# --- Cursor / Windsurf (opt-in) ---
 if [ "$CURSOR" = "true" ]; then
-  inject_reference ".cursorrules" "$TOOL_REFERENCE"
+  write_cursor_rule
 fi
 
 if [ "$WINDSURF" = "true" ]; then
-  inject_reference ".windsurfrules" "$TOOL_REFERENCE"
+  inject_reference ".windsurfrules" "Read and follow docs/seal-team-6/agents.md for agentic best practices."
 fi
 
 # --- Summary ---
@@ -244,10 +311,10 @@ echo ""
 info "Installed files:"
 info "  ${DOCS_DIR}/agents.md  — Canonical agentic context"
 info "  ${DOCS_DIR}/            — Best practices documentation"
-info "  agents.md               — Injected reference (existing content preserved)"
+info "  AGENTS.md / agents.md   — Injected reference (existing content preserved)"
 info "  CLAUDE.md               — Injected reference (existing content preserved)"
 if [ "$CURSOR" = "true" ]; then
-  info "  .cursorrules            — Cursor integration"
+  info "  .cursor/rules/seal-team-6.mdc — Cursor integration"
 fi
 if [ "$WINDSURF" = "true" ]; then
   info "  .windsurfrules          — Windsurf integration"
@@ -261,8 +328,10 @@ for lang in $LANGUAGES; do
 done
 if [ -n "$INSTALLED_LANGS" ]; then
   info "  Languages:${INSTALLED_LANGS}"
+else
+  info "  Languages: (none — use --lang=...)"
 fi
 
 echo ""
 info "Recommended: commit docs/seal-team-6/ to version control so all team members share the same standards."
-info "To update, re-run this script. To customize, edit .project-context.md"
+info "Pin installs with --version=<tag>. Customize via .project-context.md"

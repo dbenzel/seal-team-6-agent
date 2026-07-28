@@ -40,9 +40,17 @@ Identify task dependencies explicitly:
 ### 4. Progress Tracking
 
 - Mark tasks complete **immediately** when done — don't batch completions
-- Only one task should be "in progress" at a time
+- Keep **one implementation focus** at a time (one change-set you're editing toward green)
+- **Parallel is fine for independent research** — multiple reads, greps, or sub-agents that don't depend on each other
 - If a task reveals sub-tasks, add them to the list rather than trying to hold them in memory
 - If a task turns out to be unnecessary, remove it — don't leave stale items
+
+| Work type | Parallelism |
+|---|---|
+| Independent reads / searches / checks | Parallelize |
+| Sub-agent research with separate questions | Parallelize |
+| Edits that touch the same files or shared types | Serialize |
+| Implement → depends on explore results | Wait for explore, then implement |
 
 ### 5. When to Re-Plan
 
@@ -71,6 +79,6 @@ Prefer delivering working increments over big-bang completions:
 |---|---|
 | Dive into coding without understanding the full scope | Read relevant code and plan first |
 | Keep a mental list of 10+ things to do | Write them down in a tracked list |
-| Work on 3 things simultaneously | Finish one task before starting the next |
+| Interleave three unrelated implementations | One implementation focus; parallelize only independent research |
 | Ignore new information that contradicts your plan | Re-plan based on what you've learned |
 | Deliver everything at the end as one massive change | Ship incremental, verifiable progress |

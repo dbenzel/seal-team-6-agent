@@ -1,12 +1,27 @@
-# Testing & Test-Driven Development
+# Testing & Verification
 
-**Principle:** TDD is the default workflow, not an optional practice. A failing test is the starting point for every change — it defines what "done" looks like before you write a single line of implementation.
+**Principle:** Prove behavior before you declare done. Tests are evidence, not theater. Prefer test-first when risk or ambiguity is high; never ship fake greens.
 
 ---
 
-## The TDD Protocol
+## Evidence-First Decision Table
 
-This is non-negotiable. Every implementation follows this cycle:
+| Situation | Approach |
+|---|---|
+| Bug fix | Reproduce with a failing test (or failing script), then fix |
+| New non-trivial logic / API contract | Test-first (red → green → refactor) |
+| Refactor | Characterization tests first if coverage is thin; then refactor under green |
+| Trivial / obvious single-line change with existing coverage | Implement, then run the relevant suite |
+| UI copy, docs, pure config | Verify by build, preview, or checklist — not a fake unit test |
+| Untested legacy you're about to touch | Add characterization coverage for the behavior you're changing before edits |
+
+**Non-negotiable in all cases:** if you add or keep a test, it must be capable of failing. Empty bodies, `pass`, `assert True`, and placeholder assertions are forbidden.
+
+---
+
+## The TDD Protocol (when test-first applies)
+
+Use this cycle for high-risk or ambiguous application code:
 
 ### 1. Red — Write a Failing Test
 
@@ -99,9 +114,9 @@ Invest testing effort proportionally:
 
 ### 4. When to Write Tests
 
-- **New feature:** Write tests first (TDD)
+- **New feature (non-trivial):** Prefer tests first; at minimum, land real tests before calling the work done
 - **Bug fix:** Write a test that reproduces the bug first, then fix it
-- **Refactor:** Existing tests should already cover the behavior — if they don't, add tests before refactoring
+- **Refactor:** Existing tests should already cover the behavior — if they don't, add characterization tests before refactoring
 - **Deleting code:** Verify no tests break; remove tests for deleted behavior
 
 ### 5. What NOT to Test
@@ -112,19 +127,21 @@ Invest testing effort proportionally:
 - Framework boilerplate (config files, route declarations with no custom logic)
 - One-off scripts that aren't part of the application
 
-### 6. When TDD Does Not Apply
+### 6. When Full Test-First Does Not Apply
 
-TDD is the default for application code. These contexts follow a different verification strategy:
+Evidence is still required. The *form* of evidence changes:
 
-| Context | Verification Instead of TDD |
+| Context | Verification Instead of Ritual TDD |
 |---|---|
 | Configuration (CI, Docker, infra) | Verify the build/deploy works |
 | Documentation | Review for accuracy and completeness |
 | Data migrations | Run against test data, verify results |
 | Dependency updates | Run the existing test suite, verify build |
 | One-off scripts | Test the script's output manually |
+| Trivial edits with strong existing coverage | Run the relevant tests after the change |
+| UI-only presentation tweaks | Visual/browser check or storybook/preview when available |
 
-The principle remains: **verify your work**. TDD is the *how* for application code. For other contexts, verification takes a different form — but skipping verification entirely is never acceptable.
+Skipping verification entirely is never acceptable. Inventing unit tests that only assert tautologies is worse than an honest manual check.
 
 ### 7. Test Quality Standards
 
@@ -138,19 +155,17 @@ Each test should:
 
 ---
 
-## TDD in Practice: Agentic Workflow
-
-When working as an agent, TDD looks like this:
+## Agentic Workflow
 
 1. **Understand the requirement** — Read existing code, understand what needs to change
-2. **Write the test** — Create a test file or add to an existing test file
-3. **Run the test suite** — Confirm your new test fails (red)
-4. **Implement** — Write the minimum code to pass the test
-5. **Run the test suite again** — Confirm green (new test passes, no regressions)
-6. **Refactor if needed** — Clean up while keeping tests green
-7. **Report** — Tell the user what you tested and the results
+2. **Choose evidence level** — Use the decision table above (test-first vs implement-then-verify)
+3. **If test-first:** write the test, run it, confirm red, then implement
+4. **If implement-then-verify:** implement the minimal change, then run the relevant suite (and add tests if coverage for the changed behavior is missing)
+5. **Confirm green / no regressions** — Read the output; don't assume success
+6. **Refactor if needed** — Only under green, within blast radius
+7. **Report** — Tell the user what you verified and the results
 
-**Critical:** Step 3 is not optional. You must observe the red state. If you skip it, you have no proof the test actually validates anything.
+**Critical:** If you claim a new test proves a behavior, you must have observed it fail for the right reason (or be fixing a bug where the reproduction failed first). Never skip reading test output.
 
 ---
 
@@ -158,8 +173,9 @@ When working as an agent, TDD looks like this:
 
 | Don't | Do Instead |
 |---|---|
-| Write implementation first, tests after | Write the test first — always |
-| Write a test that passes immediately | Ensure it fails before implementation exists |
+| Skip verification because the change "looks small" | Run the relevant checks anyway |
+| Force a full red-green ritual on a one-line copy tweak | Verify appropriately; don't invent theater tests |
+| Write a test that passes immediately when doing test-first | Ensure it fails before implementation exists |
 | Use `pass`, `True`, or empty bodies to get green | Write a real assertion against expected behavior |
 | Skip a failing test instead of fixing it | Fix the code or fix the test — skipping is hiding |
 | Write one giant test for multiple behaviors | One test per behavior, with a descriptive name |
@@ -171,7 +187,7 @@ When working as an agent, TDD looks like this:
 
 ## Assessing & Improving Existing Coverage
 
-TDD governs new code. But most projects have existing code with gaps. This section addresses how to honestly assess coverage and systematically improve it.
+Evidence-first governs new work. Most projects also have existing coverage gaps. This section addresses how to honestly assess coverage and systematically improve it.
 
 ### Measuring Coverage
 

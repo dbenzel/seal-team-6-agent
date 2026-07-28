@@ -11,11 +11,11 @@
 Large documents bloat context and dilute signal. Instead, structure guidance as a shallow tree:
 
 ```
-agents.md (root — always loaded, ~100 lines)
+agents.md / AGENTS.md (root — always loaded, ~100–150 lines)
 │
-├── References Layer 1 docs (load all — they're behavioral guardrails)
-├── References Layer 2 docs (load all — they're engineering principles)
-└── References Layer 3 docs (load selectively — only matching languages)
+├── Layer 1 (agentic) — load guardrails always; others per Loading Strategy
+├── Layer 2 (engineering) — load testing + code-quality for code tasks; rest on demand
+└── Layer 3 (languages) — only stacks detected in the project
 ```
 
 **Why this works:** The root file is concise enough to always fit in context. It tells the agent *what exists* and *when to load it*. The agent then follows references on-demand rather than ingesting everything upfront. This is the same principle as lazy evaluation — defer work until it's needed.
@@ -65,25 +65,19 @@ file paths and function names."
 "Look at the codebase and tell me about the API."
 ```
 
-### 5. Context Budgeting
+### 5. Context Discipline (Concrete Tactics)
 
-Treat your context window as a budget. Every file you read, every search result you load, every sub-agent result you incorporate costs tokens and displaces other information.
+You cannot reliably enforce percentage quotas. Use tactics that actually reduce waste:
 
-**Budget allocation strategy:**
+1. **Search before reading** — locate the symbol/file, then read the slice you need
+2. **Offset / section reads** for large files — don't ingest 2k-line files whole
+3. **Prefer paths + line refs** over pasting large code blocks into your notes
+4. **Summarize then discard** raw search dumps and sub-agent transcripts
+5. **Delegate high-volume I/O** to sub-agents; keep only the answer in the parent
+6. **Re-read after compaction** only the files still in active edit scope
+7. **One implementation focus** — parallelize research, not three half-finished edits
 
-| Context Share | Purpose |
-|---|---|
-| ~20% | Understanding the task (user request, requirements, discussion) |
-| ~30% | Reading the code being modified (the files you're changing) |
-| ~20% | Reading related code (imports, types, tests for the code you're changing) |
-| ~15% | Exploration and research (finding files, understanding patterns) |
-| ~15% | Headroom for tool outputs, error messages, iteration |
-
-When you're running low on context:
-- Summarize what you've learned rather than keeping raw file contents
-- Delegate remaining research to sub-agents
-- Reference files by path and line number instead of quoting them
-- Focus on the most critical remaining tasks
+When context feels crowded: stop exploring, summarize findings, finish the current change-set, verify.
 
 ### 6. Parallel Sub-Agents for Independent Queries
 
@@ -120,9 +114,9 @@ This document set (`agents.md` + `docs/`) is itself an example of the reference 
    - One-sentence summary of each referenced doc (enough to decide whether to load it)
    - Operating principles (always-applicable rules)
 
-2. **Layer 1 (agentic)** — 7 files. Guardrails are always loaded; the rest are loaded as they become relevant to the current task (see Loading Strategy in `agents.md`).
+2. **Layer 1 (agentic)** — behavioral docs. Guardrails are always loaded; modes/untrusted-input/others follow the Loading Strategy in `agents.md`.
 
-3. **Layer 2 (engineering)** — 7 files. Testing and code-quality are loaded for code tasks; the rest are loaded on demand (see Loading Strategy in `agents.md`).
+3. **Layer 2 (engineering)** — Testing and code-quality are loaded for code tasks; the rest are loaded on demand (see Loading Strategy in `agents.md`).
 
 4. **Layer 3 (languages)** — Loaded conditionally per stack. A Python project never loads the Rust guide. A polyglot project loads multiple.
 
