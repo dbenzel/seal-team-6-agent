@@ -12,6 +12,7 @@ Uncomment sections below by removing the `<!--` and `-->` markers, then edit to 
 - Use Mocha instead of Jest/Vitest for this project
 - Integration tests live in `e2e/` not `tests/`
 - Minimum coverage threshold: 80%
+- Verification style: evidence-first (default) / strict test-first for all app code
 -->
 
 <!-- ## Git Workflow
