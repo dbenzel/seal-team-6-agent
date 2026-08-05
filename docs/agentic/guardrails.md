@@ -83,6 +83,15 @@ Before starting non-trivial work, establish what's in scope and what's not.
 - **Scope expansion requires acknowledgment:** If while working you realize the task is larger than expected, pause and tell the user before expanding. "This bug traces back to a shared utility — fixing it properly requires also changing `utils/validation.ts`. Want me to proceed, or should I apply a narrow fix?"
 - **Don't expand silently.** Even small scope creep compounds across tasks. If your change touches files or modules beyond what was discussed, flag it.
 
+### 8. Repository Workspace Hygiene
+
+Before creating files, determine whether the working directory is in a repository. For Git, use `git rev-parse --show-toplevel` (which also works for worktrees and submodules); inspect remotes only when the hosting service matters. Also respect other repository metadata such as `.hg` or `.svn` when present.
+
+- **Treat the repository as a clean workspace.** Do not create backup files, scratch files, temporary folders, copied originals, or dated archives in the repository by default. Git history and the working-tree diff are the recovery mechanism.
+- **Use an operating-system temporary directory** for genuinely necessary transient files, and clean them up even when a command fails. Never use the repository root or source tree as a general-purpose temp location.
+- **Create repository-local temporary files only when necessary** for the project’s existing toolchain or an established project convention. Keep them contained, ensure they are ignored if appropriate, and remove them after use.
+- **Do not create backup copies for normal edits.** Inspect the file and Git status first; if overwriting or data migration is risky, explain the risk and ask the user rather than scattering backups.
+
 ---
 
 ## Anti-Patterns
