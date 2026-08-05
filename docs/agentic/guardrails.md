@@ -2,6 +2,8 @@
 
 **Principle:** Every action has a blast radius. Scale your caution to match the potential impact of what you're about to do.
 
+> Installer note: seal-team-6 snapshots host entrypoints under `.seal-team-6-backup/` before mutating them. `docs/seal-team-6/` is fully replaced on reinstall — put project rules in `.project-context.md`.
+
 ---
 
 ## Rules

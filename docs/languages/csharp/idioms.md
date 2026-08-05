@@ -1,5 +1,7 @@
 # C# Idioms
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 **Principle:** Modern C# is expressive, type-safe, and allocation-conscious. Lean on the type system to prevent bugs at compile time, use records and pattern matching to express intent clearly, and let async/await flow end-to-end without blocking.
 
 ---

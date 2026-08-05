@@ -1,5 +1,7 @@
 # TypeScript Idioms
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 **Principle:** TypeScript's value is its type system. Every pattern you adopt should make the compiler your first line of defense — not something you work around. If you find yourself casting, asserting, or suppressing errors, you're fighting the language instead of using it.
 
 ---

@@ -1,5 +1,7 @@
 # Go Idioms & Patterns
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 **Principle:** Go rewards simplicity and explicitness. The language was designed to make the right thing easy and the wrong thing obvious. Write code that reads like prose to a Go programmer — no magic, no cleverness, no framework gymnastics. If your Go code needs a comment explaining *what* it does, rewrite it until it doesn't.
 
 ---

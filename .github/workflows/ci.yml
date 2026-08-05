@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  checksums-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate checksums and diff
+        run: |
+          chmod +x scripts/generate-checksums.sh
+          ./scripts/generate-checksums.sh
+          git diff --exit-code checksums.sha256 || {
+            echo "::error::checksums.sha256 is stale. Run ./scripts/generate-checksums.sh and commit."
+            exit 1
+          }
+
+  install-smoke-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate checksums (workspace may need them for --verify)
+        run: |
+          chmod +x scripts/*.sh install.sh
+          ./scripts/generate-checksums.sh
+      - name: Run install smoke tests
+        run: ./scripts/install-smoke-test.sh
+
+  install-smoke-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate checksums
+        run: |
+          chmod +x scripts/*.sh install.sh
+          ./scripts/generate-checksums.sh
+      - name: Run install smoke tests
+        run: ./scripts/install-smoke-test.sh
+
+  install-smoke-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate checksums
+        shell: bash
+        run: |
+          chmod +x scripts/generate-checksums.sh
+          ./scripts/generate-checksums.sh
+      - name: Smoke install.ps1 (local)
+        shell: pwsh
+        run: |
+          $tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("st6-" + [guid]::NewGuid()))
+          Push-Location $tmp.FullName
+          git init
+          '{"name":"smoke"}' | Set-Content package.json
+          '# existing' | Set-Content AGENTS.md
+          & "$env:GITHUB_WORKSPACE/install.ps1" -Local -Lang typescript -Cursor -NoVerify
+          if (-not (Test-Path "docs/seal-team-6/VERSION")) { throw "VERSION missing" }
+          if (-not (Select-String -Path AGENTS.md -Pattern "BEGIN seal-team-6")) { throw "marker missing" }
+          if (-not (Test-Path ".seal-team-6-backup")) { throw "backup missing" }
+          & "$env:GITHUB_WORKSPACE/install.ps1" -Uninstall -UninstallDocs
+          if (Test-Path "docs/seal-team-6") { throw "docs should be removed" }
+          Pop-Location

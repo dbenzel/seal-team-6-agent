@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Installer artifacts (if testing install in this repo)
+.seal-team-6-backup/
+docs/seal-team-6/
+*.seal-team-6.bak
+AGENTS.md
+
+# Python / Node accidental locals
+__pycache__/
+*.pyc
+node_modules/
+.venv/
+venv/
+
+# Test / temp
+/tmp-install-*/
+.pytest_cache/
+coverage/

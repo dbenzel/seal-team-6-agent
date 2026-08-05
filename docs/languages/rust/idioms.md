@@ -1,5 +1,7 @@
 # Rust Idioms & Patterns
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 **Principle:** Leverage Rust's type system and ownership model to eliminate entire categories of bugs at compile time. If the compiler can enforce an invariant, it should. Write code that is impossible to misuse, not merely difficult to misuse.
 
 ---

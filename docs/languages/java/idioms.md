@@ -1,5 +1,7 @@
 # Java Idioms: Patterns and Anti-Patterns
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 > **Principle:** Modern Java (17+) is an expressive, type-safe language with powerful modeling capabilities. Use records, sealed types, and pattern matching to make illegal states unrepresentable. Prefer immutability by default, fail fast on invalid input, and let the type system carry as much meaning as possible. Code that compiles should be code that works.
 
 ---

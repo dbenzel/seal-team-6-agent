@@ -4,47 +4,61 @@ Battle-tested guardrails and best practices for AI-assisted software engineering
 
 Think of it as a **package manager for agentic context** — replicate successful patterns without manual duplication. But unlike a static config drop, seal-team-6 compounds: every interaction makes the codebase measurably better, with your consent at every step.
 
+**Current version:** see [`VERSION`](./VERSION) (v1.0.0). Prefer pinning installs to a git tag.
+
 ## Quick Start
 
-**Prefer a pinned version** once a release tag exists (`--version=vX.Y.Z` / `-Version vX.Y.Z`). Floating `main` works for dogfooding; see `CHANGELOG.md`.
+**Prefer a pinned version** (`--version=v1.0.0` / `-Version v1.0.0`). Floating `main` works for dogfooding; see `CHANGELOG.md`.
 
 **macOS / Linux:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh -s -- --version=v1.0.0
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1))) -Version v1.0.0
 ```
 
 > **Windows note:** If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first.
 
+### From a local clone (dev / CI)
+
+```bash
+./install.sh --local --lang=typescript --cursor
+# Windows:
+# .\install.ps1 -Local -Lang typescript -Cursor
+```
+
 This installs into your current project directory:
-- `docs/seal-team-6/` — Full best practices documentation (canonical source)
-- `AGENTS.md` and `agents.md` — seal-team-6 reference **prepended** (existing content preserved)
-- `CLAUDE.md` — Same inject-at-top behavior
-- `.project-context.example.md` — Template for project-specific intelligence
-- `TECH_DEBT.example.md` — Structured debt log template (if `TECH_DEBT.md` is absent)
+
+| Path | Purpose |
+|---|---|
+| `docs/seal-team-6/` | Full best practices pack (**fully overwritten** on reinstall) |
+| `docs/seal-team-6/VERSION` | Installed pack version |
+| `AGENTS.md` / `agents.md` | Managed reference block (only files that already exist; creates `AGENTS.md` if neither exists) |
+| `CLAUDE.md` | Managed reference block (created if missing) |
+| `.seal-team-6-backup/<timestamp>/` | Snapshots of host files **before** mutation |
+| `.project-context.example.md` | Template (only if `.project-context.md` is absent) |
+| `TECH_DEBT.example.md` | Debt template (only if `TECH_DEBT.md` is absent) |
 
 Language guides default to **auto-detect** from project markers (not all six stacks).
 
 ### Install Specific Languages
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh -s -- --lang=typescript,python
+curl -fsSL https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.sh | sh -s -- --version=v1.0.0 --lang=typescript,python
 # or everything:
-curl -fsSL .../install.sh | sh -s -- --lang=all
+curl -fsSL .../install.sh | sh -s -- --version=v1.0.0 --lang=all
 ```
 
-**Windows (PowerShell):**
+**Windows:**
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dbenzel/seal-team-6-agent/main/install.ps1))) -Lang typescript,python
-# or:
-& ([scriptblock]::Create((irm .../install.ps1))) -Lang all
+& ([scriptblock]::Create((irm .../install.ps1))) -Version v1.0.0 -Lang typescript,python
+& ([scriptblock]::Create((irm .../install.ps1))) -Version v1.0.0 -Lang all
 ```
 
 Available languages: `typescript`, `python`, `go`, `rust`, `java`, `csharp`
@@ -52,19 +66,52 @@ Available languages: `typescript`, `python`, `go`, `rust`, `java`, `csharp`
 ### Additional Options
 
 ```bash
-# Pin to a specific version (recommended)
-curl -fsSL .../install.sh | sh -s -- --version=v1.1.0
+# Pin + host adapters
+curl -fsSL .../install.sh | sh -s -- --version=v1.0.0 --cursor --windsurf --continue --aider
 
-# Native Cursor rules (+ optional Windsurf)
-curl -fsSL .../install.sh | sh -s -- --cursor --windsurf
+# Preview without writing
+./install.sh --local --dry-run --lang=all
+
+# Skip integrity check (not recommended)
+./install.sh --local --no-verify
+
+# Remove managed blocks (keep docs unless --uninstall-docs)
+./install.sh --uninstall
+./install.sh --uninstall --uninstall-docs
 ```
 
-**Windows (PowerShell):**
+**Windows:**
 
 ```powershell
-& ([scriptblock]::Create((irm .../install.ps1))) -Version v1.1.0
-& ([scriptblock]::Create((irm .../install.ps1))) -Cursor -Windsurf
+& ([scriptblock]::Create((irm .../install.ps1))) -Version v1.0.0 -Cursor -Windsurf -Continue -Aider
+.\install.ps1 -Local -DryRun -Lang all
+.\install.ps1 -Uninstall -UninstallDocs
 ```
+
+| Flag (sh / ps1) | Meaning |
+|---|---|
+| `--version` / `-Version` | Git tag or commit to install from |
+| `--local` / `-Local` | Install from this repo checkout |
+| `--source=DIR` / `-Source` | Install from a local directory |
+| `--lang` / `-Lang` | Language packs or `all` |
+| `--cursor` / `-Cursor` | `.cursor/rules/seal-team-6.mdc` |
+| `--windsurf` / `-Windsurf` | Inject `.windsurfrules` |
+| `--continue` / `-Continue` | `.continue/rules/seal-team-6.md` |
+| `--aider` / `-Aider` | `.aider.conf.yml` read paths |
+| `--dry-run` / `-DryRun` | No writes |
+| `--uninstall` / `-Uninstall` | Remove markers + host rules |
+| `--uninstall-docs` / `-UninstallDocs` | Also delete `docs/seal-team-6/` |
+| `--no-backup` / `-NoBackup` | Skip `.seal-team-6-backup/` |
+| `--verify` / `--no-verify` | Checksum verification (default: on when file exists) |
+
+## Safety & Backups
+
+- **Host files** (`AGENTS.md`, `agents.md`, `CLAUDE.md`, `.windsurfrules`, Cursor/Continue rules) are copied to `.seal-team-6-backup/<timestamp>/` **before** the installer mutates them (unless `--no-backup`).
+- **Atomic writes** use a temp file + rename for host entrypoints.
+- **`docs/seal-team-6/` is not merged** — each install refreshes the whole pack. Do not hand-edit files there expecting them to survive reinstall; put project-specific rules in `.project-context.md`.
+- **Never overwritten:** `.project-context.md`, `TECH_DEBT.md`.
+- **Checksums:** releases include `checksums.sha256`. Install verifies installed guidance files when that file is available (`--no-verify` to skip).
+- The installer adds `.seal-team-6-backup/` to `.gitignore` when a `.git` directory is present.
 
 ## What's Inside
 
@@ -105,7 +152,7 @@ AGENTS.md / agents.md (root)
 
 ### How It Works
 
-1. The installer **injects a reference block** at the top of `AGENTS.md`, `agents.md`, and `CLAUDE.md` (or creates them). Existing content is preserved.
+1. The installer **injects a reference block** into host entrypoint files (or creates `AGENTS.md` / `CLAUDE.md`). Existing content is preserved; pre-mutation backups are written.
 2. The canonical entrypoint detects your stack and loads matching language guides.
 3. New code follows seal-team-6 standards. Existing code is respected — seal-team-6 only overrides for security issues or harmful patterns.
 4. On first interaction, the agent **suggests a health snapshot** — you decide whether to run it.
@@ -138,21 +185,45 @@ It covers testing conventions, coverage targets, architecture rules, agent impro
 
 ## Updating
 
-Re-run the install command (ideally with `--version=`). Idempotent markers update in place; `docs/seal-team-6/` refreshes; `.project-context.md` is preserved.
+Re-run the install command with a pinned `--version=` / `-Version`. Idempotent markers update in place; `docs/seal-team-6/` **refreshes entirely**; `.project-context.md` is preserved. Previous host-file snapshots remain under `.seal-team-6-backup/`.
 
 ## Supported AI Tools
 
 | Tool | Integration |
 |---|---|
-| **Claude Code** | Reads `CLAUDE.md` → seal-team-6 entrypoint |
-| **Cursor** | `--cursor` / `-Cursor` writes `.cursor/rules/seal-team-6.mdc`; also reads `AGENTS.md` |
-| **Codex / AGENTS.md hosts** | `AGENTS.md` injected by default |
-| **Windsurf** | `--windsurf` / `-Windsurf` injects `.windsurfrules` |
-| **Other** | Point your tool at `AGENTS.md` or `docs/seal-team-6/agents.md` |
+| **Claude Code** | `CLAUDE.md` injected by default |
+| **Codex / AGENTS.md hosts** | `AGENTS.md` (created if no agent host file exists) |
+| **Cursor** | `--cursor` / `-Cursor` → `.cursor/rules/seal-team-6.mdc` |
+| **Windsurf** | `--windsurf` / `-Windsurf` → `.windsurfrules` |
+| **Continue** | `--continue` / `-Continue` → `.continue/rules/seal-team-6.md` |
+| **Aider** | `--aider` / `-Aider` → `.aider.conf.yml` read paths |
+| **Grok / other** | Point the host at `AGENTS.md` or `docs/seal-team-6/agents.md` |
+
+## Integrity & releases
+
+- `VERSION` — semver for the pack
+- `manifest.conf` — file lists shared by installers and CI
+- `checksums.sha256` — regenerate with `./scripts/generate-checksums.sh` after content changes
+- CI runs install smoke tests on Ubuntu, macOS, and Windows and fails if checksums are stale
+
+### Cutting a release
+
+```bash
+# 1. Bump VERSION + manifest.conf VERSION + CHANGELOG
+# 2. ./scripts/generate-checksums.sh
+# 3. Commit, then:
+git tag -a v1.0.0 -m "seal-team-6 v1.0.0"
+git push origin main --tags
+```
 
 ## Guidance quality
 
-See `docs/evals/README.md` for a golden-task checklist. Treat G02–G04 regressions as release blockers when changing guidance.
+See `docs/evals/README.md` and `./scripts/eval-golden.sh` for the golden-task checklist. Treat G02–G04 regressions as release blockers when changing guidance.
+
+```bash
+./scripts/eval-golden.sh        # print rubric table
+./scripts/install-smoke-test.sh # installer regression suite
+```
 
 ## Contributing
 
@@ -162,6 +233,7 @@ PRs welcome. The bar for new content:
 2. **Battle-tested** — it should come from real experience, not theory
 3. **Concise** — every sentence should earn its place
 4. **Measured** — if you change agent behavior, note which golden tasks you walked
+5. **Manifest + checksums** — update `manifest.conf` if you add installable files; regenerate `checksums.sha256`
 
 ## License
 

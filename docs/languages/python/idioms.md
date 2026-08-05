@@ -1,5 +1,7 @@
 # Python Idioms: Patterns and Anti-Patterns
 
+> Last reviewed: 2026-08 (seal-team-6 v1.0.0)
+
 > **Principle:** Write Python that leverages the language's full type system, standard library, and idioms. Treat Python as a gradually typed, expressive language — not a scripting toy. Code should be explicit, predictable, and hostile to runtime surprises.
 
 ---
